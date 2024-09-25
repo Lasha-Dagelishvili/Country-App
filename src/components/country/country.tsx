@@ -1,6 +1,11 @@
-
-
-function CountryCard({ name, capital, population, image }: { name: string, capital: string, population: string, image: string }) {
+const CountryCard = (
+  { name, capital, population, image}: 
+  { name: string, 
+    capital: string, 
+    population: string, 
+    image: string 
+  }) => {
+    
   return (
     <div className="card">
       <img src={image} alt={`Image of ${name}`} />
@@ -8,9 +13,10 @@ function CountryCard({ name, capital, population, image }: { name: string, capit
         <h2>{name}</h2>
         <p><strong>Capital:</strong> {capital}</p>
         <p><strong>Population:</strong> {population}</p>
+        <button>more | info</button>
       </div>
     </div>
   );
-}
+};
 
 export default CountryCard;
