@@ -1,9 +1,9 @@
-import './Hero.css';
-import countryImage from './pic/world.jpg';
-import country1 from './pic/country1.jpg';
-import country2 from './pic/country2.jpg';
-import country3 from './pic/country3.jpg';
-import CountryCard from '../country/country'; 
+import '@/components/hero/Hero.css';
+import countryImage from '@/components/hero/pic/world.jpg';
+import country1 from '@/components/hero/pic/country1.jpg';
+import country2 from '@/components/hero/pic/country2.jpg';
+import country3 from '@/components/hero/pic/country3.jpg';
+import CountryCard from '@/components/country/country'; 
 import { useState, useEffect } from 'react';
 
 const Hero: React.FC = () => {
@@ -31,7 +31,7 @@ const Hero: React.FC = () => {
 
   return (
     <>
-      <header>
+      <section>
         <h1>Countries App</h1>
         <div className='picdiv'>
           <img className='pic' src={countryImage} alt="Country" />
@@ -61,7 +61,7 @@ const Hero: React.FC = () => {
             ))}
           </div>
         )}
-      </header>
+      </section>
     </>
   );
 }

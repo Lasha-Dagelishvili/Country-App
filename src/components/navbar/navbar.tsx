@@ -1,7 +1,8 @@
-import './navbar.css'
+import '@/components/navbar/navbar.css'
 
 const Navbar: React.FC = () => {
     return (
+      <header>
       <nav> 
         <div className='container'>
           <h2><a href='/'>Home</a></h2>
@@ -9,6 +10,7 @@ const Navbar: React.FC = () => {
           <h2><a href='/'>About Us</a></h2> 
         </div>
       </nav>
+      </header>
     );
   };
 
