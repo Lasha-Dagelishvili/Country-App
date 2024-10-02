@@ -1,4 +1,4 @@
-import '@/components/footer/footer.css'
+import '@/components/base/footer/footer.css'
 
 const Footer: React.FC = () => {
   return (

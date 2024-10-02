@@ -3,10 +3,7 @@
 }
 
 .container {
-    position: fixed;
-    top: 0;
-    right: 0;
-    left: 0;
+
     display: flex;
     justify-content: space-evenly       ;
     align-items: center;
@@ -18,18 +15,18 @@
     
 }
 
-.container h2 {
+.nav_items {
     text-align: center;
     cursor: pointer;
     color: white;
+    text-decoration: none;
 }
 
-.container h2 a {
+.nav_items h2 {
     color: white;
-    text-decoration: none;
     transition: color 0.3s;
 }
 
-.container h2 a:hover {
+.nav_items h2:hover {
     color: #1da1f2;
 }

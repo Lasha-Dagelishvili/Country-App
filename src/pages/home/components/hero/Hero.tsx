@@ -1,9 +1,9 @@
-import '@/components/hero/Hero.css';
-import countryImage from '@/components/hero/pic/world.jpg';
-import country1 from '@/components/hero/pic/country1.jpg';
-import country2 from '@/components/hero/pic/country2.jpg';
-import country3 from '@/components/hero/pic/country3.jpg';
-import CountryCard from '@/components/country/country'; 
+import '@/pages/home/components/hero/Hero.css';
+import countryImage from '@/pages/home/components/hero/pic/world.jpg';
+import country1 from '@/pages/home/components/hero/pic/country1.jpg';
+import country2 from '@/pages/home/components/hero/pic/country2.jpg';
+import country3 from '@/pages/home/components/hero/pic/country3.jpg';
+import CountryCard from '@/pages/home/components/country/country'; 
 import { useState, useEffect } from 'react';
 
 const Hero: React.FC = () => {
@@ -15,6 +15,7 @@ const Hero: React.FC = () => {
     fetch('https://restcountries.com/v3.1/all')
       .then(response => response.json())
       .then(data => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const countryData = data.map((country: any) => ({
           name: country.name.common,
           capital: country.capital ? country.capital[0] : 'No Capital',
