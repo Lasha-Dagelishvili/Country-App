@@ -6,7 +6,7 @@ import AboutView from './pages/about/views/about';
 import ContactInformationView from './pages/contact/views/contact';
 import NotFoundPage from './pages/404';
 import { Suspense } from 'react';
-import CountryDetails from './pages/home/components/country/CountryDetails';
+import CountryDetails from './pages/home/components/country/countrydetails';
 import Hero from './pages/home/components/hero/Hero';
 
 function App() {
