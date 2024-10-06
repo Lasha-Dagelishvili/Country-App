@@ -22,11 +22,19 @@
     text-decoration: none;
 }
 
-.nav_items h2 {
+
+
+.nav_items {
+    font-size: 30px;
+    font-weight: 600;
     color: white;
     transition: color 0.3s;
 }
 
-.nav_items h2:hover {
+.active {
+    color:#1da1f2;
+}
+
+.nav_items:hover {
     color: #1da1f2;
 }
