@@ -2,9 +2,26 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import './countrydetails.css';
 
+interface Country {
+  name: {
+    common: string;
+  };
+  flags: {
+    png: string;
+  };
+  capital?: string[];
+  population: number;
+  region: string;
+  subregion: string;
+  area: number;
+  languages?: { [key: string]: string };
+  currencies?: { [key: string]: { name: string } };
+  timezones: string[];
+}
+
 const CountryDetails = () => {
   const { name } = useParams<{ name: string }>();
-  const [country, setCountry] = useState<any>(null);
+  const [country, setCountry] = useState<Country | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,7 +30,7 @@ const CountryDetails = () => {
     fetch(`https://restcountries.com/v3.1/name/${name}`)
       .then(response => response.json())
       .then(data => {
-        const countryData = data.find((country: any) => country.name.common === name);
+        const countryData = data.find((country: Country) => country.name.common === name);
         if (countryData) {
           setCountry(countryData);
         }

@@ -1,15 +1,14 @@
 import '@/pages/home/components/hero/Hero.css';
 import countryImage from '@/pages/home/components/hero/pic/world.jpg';
-import country1 from '@/pages/home/components/hero/pic/country1.jpg';
-import country2 from '@/pages/home/components/hero/pic/country2.jpg';
-import country3 from '@/pages/home/components/hero/pic/country3.jpg';
-import CountryCard from '@/pages/home/components/country/country'; 
+import CountryCard from '@/pages/home/components/country/country';
 import { useState, useEffect } from 'react';
 
-const Hero: React.FC = () => {
-  const [countries, setCountries] = useState([]);
-  const [showCountries, setShowCountries] = useState(false);
 
+const Hero: React.FC = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [countries, setCountries] = useState<any[]>([]);
+  const [showCountries, setShowCountries] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     fetch('https://restcountries.com/v3.1/all')
@@ -20,6 +19,7 @@ const Hero: React.FC = () => {
           name: country.name.common,
           capital: country.capital ? country.capital[0] : 'No Capital',
           population: country.population.toLocaleString(),
+          likes: 0
         }));
         setCountries(countryData);
       })
@@ -30,42 +30,62 @@ const Hero: React.FC = () => {
     setShowCountries(!showCountries);
   };
 
+  const handleLike = (index: number) => {
+    const updatedCountries = [...countries];
+    updatedCountries[index].likes += 1;
+    setCountries(updatedCountries);
+  };
+
+  const handleSort = () => {
+    const sortedCountries = [...countries].sort((a, b) => {
+      return sortOrder === 'asc' ? a.likes - b.likes : b.likes - a.likes;
+    });
+    setCountries(sortedCountries);
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
+
   return (
     <>
       <section>
         <h1>Countries App</h1>
-        <div className='picdiv'>
-          <img className='pic' src={countryImage} alt="Country" />
+        <div className="picdiv">
+          <img className="pic" src={countryImage} alt="Country" />
           <h2>Explore countries around the world</h2>
         </div>
 
         <div className="text">Visit Beautiful Places</div>
 
-        <div className="card-container">
-          <CountryCard name="Japan" capital="Tokyo" population="125,800,000" image={country1} />
-          <CountryCard name="USA" capital="Washington D.C." population="331,893,745" image={country2} />
-          <CountryCard name="Georgia" capital="Tbilisi" population="3,720,000" image={country3} />
-        </div>
-
-        <h3 className='countrylist' onClick={toggleCountries}>
+        <h3 className="countrylist" onClick={toggleCountries}>
           List of Countries
         </h3>
 
         {showCountries && (
-          <div className="country-cards-container">
-            {countries.map((country, index) => (
-              <div key={index} className="country-card">
-                <h2>{country.name}</h2>
-                <p><strong>Capital:</strong> {country.capital}</p>
-                <p><strong>Population:</strong> {country.population}</p>
-              </div>
-            ))}
-          </div>
+          <>
+            <button onClick={handleSort}>
+              Sort by Likes ({sortOrder === 'asc' ? 'Ascending' : 'Descending'})
+            </button>
+
+            <div className="country-cards-container">
+              {countries.map((country, index) => (
+                <CountryCard
+                  key={index}
+                  name={country.name}
+                  capital={country.capital}
+                  population={country.population}
+                  image={countryImage}
+                  likes={country.likes}
+                  onLike={() => handleLike(index)}
+                />
+              ))}
+            </div>
+          </>
         )}
       </section>
     </>
   );
-}
-  Hero.displayName = "Hero component"
+};
+
+ Hero.displayName = "Hero component"
 
 export default Hero;
+
