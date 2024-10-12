@@ -1,12 +1,21 @@
 import { Link } from 'react-router-dom';
 
-
 const CountryCard = (
-  { name, capital, population, image, likes = 0, onLike = () => {} }: 
-  { name: string; capital: string; population: string; image: string; likes?: number; onLike?: () => void }
+  { name, capital, population, image, likes = 0, onLike = () => {}, onDelete = () => {}, onRestore = () => {}, isDeleted = false }: 
+  { 
+    name: string; 
+    capital: string; 
+    population: string; 
+    image: string; 
+    likes?: number; 
+    onLike?: () => void; 
+    onDelete?: () => void; 
+    onRestore?: () => void;
+    isDeleted?: boolean;
+  }
 ) => {
   return (
-    <div className="card">
+    <div className={`card ${isDeleted ? 'deleted' : ''}`}>
       <img src={image} alt={`Image of ${name}`} />
       <div className="info">
         <h2>{name}</h2>
@@ -14,11 +23,19 @@ const CountryCard = (
         <p><strong>Population:</strong> {population}</p>
         <p><strong>Likes:</strong> {likes}</p>
 
-        <Link to={`/country/${name}`}>
-          <button>More Info</button>
-        </Link>
+        {!isDeleted && (
+          <>
+            <Link to={`/country/${name}`}>
+              <button>More Info</button>
+            </Link>
+            <button onClick={onLike}>Like</button>
+            <button onClick={onDelete}>Delete</button>
+          </>
+        )}
 
-        {onLike && <button onClick={onLike}>Like</button>}
+        {isDeleted && (
+          <button onClick={onRestore}>Restore</button>
+        )}
       </div>
     </div>
   );
