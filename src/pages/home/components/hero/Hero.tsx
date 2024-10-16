@@ -86,6 +86,64 @@ const Hero: React.FC = () => {
   const [showCountries, setShowCountries] = useState(false);
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  const [formData, setFormData] = useState({
+    name: '',
+    capital: '',
+    population: '',
+  });
+  const [errors, setErrors] = useState({
+    name: '',
+    capital: '',
+    population: '',
+  });
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { name: '', capital: '', population: '' };
+
+    if (formData.name.trim().length < 3) {
+      newErrors.name = 'Country name must be at least 3 characters long';
+      isValid = false;
+    }
+
+    if (formData.capital.trim().length < 2) {
+      newErrors.capital = 'Capital name must be at least 2 characters long';
+      isValid = false;
+    }
+
+    if (!/^\d+$/.test(formData.population) || parseInt(formData.population) <= 0) {
+      newErrors.population = 'Population must be a positive number';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const addCountry = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    const newCountry = {
+      name: formData.name.trim(),
+      capital: formData.capital.trim(),
+      population: formData.population,
+      likes: 0,
+      deleted: false,
+    };
+    dispatch({ type: 'ADD_COUNTRY', payload: newCountry });
+    setFormData({ name: '', capital: '', population: '' }); // Clear the form
+    setErrors({ name: '', capital: '', population: '' }); // Reset errors
+  };
+
+  const toggleCountries = () => setShowCountries(!showCountries);
+
+
   useEffect(() => {
     fetch('https://restcountries.com/v3.1/all')
       .then(response => response.json())
@@ -103,8 +161,6 @@ const Hero: React.FC = () => {
       .catch(error => console.error('Error fetching countries:', error));
   }, []);
 
-  const toggleCountries = () => setShowCountries(!showCountries);
-
   const handleLike = (index: number) => {
     dispatch({ type: 'LIKE_COUNTRY', payload: index });
   };
@@ -121,92 +177,109 @@ const Hero: React.FC = () => {
     dispatch({ type: 'RESTORE_COUNTRY', payload: index });
   };
 
-  const addCountry = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const name = formData.get('name') as string;
-    const capital = formData.get('capital') as string;
-    const population = formData.get('population') as string;
-
-    const newCountry = {
-      name,
-      capital,
-      population,
-      likes: 0,
-      deleted: false
-    };
-    dispatch({ type: 'ADD_COUNTRY', payload: newCountry });
-  };
-
-  return (
-    <>
-      <section>
-        <div className="countries-artickle">
-          Countries App
-        </div>
+          return (
+            <>
+              <section>
+                <div className="countries-artickle">Countries App</div>
         
-        <div className="picdiv">
-          <img className="pic" src={countryImage} alt="Country" />
-          <h2>Explore countries around the world</h2>
-        </div>
-
-        <div className="text">Visit Beautiful Places</div>
-
-        <h3 className="countrylist" onClick={toggleCountries}>
-          List of Countries
-        </h3>
-
-        <form onSubmit={addCountry}>
-          <input type="text" name="name" placeholder="Country name" required />
-          <input type="text" name="capital" placeholder="Capital" required />
-          <input type="text" name="population" placeholder="Population" required />
-          <button type="submit">Add Country</button>
-        </form>
-
-        {showCountries && (
-          <>
-            <button onClick={handleSort}>
-              Sort by Likes ({state.sortOrder === 'asc' ? 'Ascending' : 'Descending'})
-            </button>
-
-            <div className="country-cards-container">
-              {state.countries.map((country, index) => (
-                <CountryCard
-                  key={index}
-                  name={country.name}
-                  capital={country.capital}
-                  population={country.population}
-                  image={countryImage}
-                  likes={country.likes}
-                  onLike={() => handleLike(index)}
-                  onDelete={() => handleDelete(index)}
-                  isDeleted={country.deleted}
-                />
-              ))}
-            </div>
-
-            <div className="deleted-country-article">Deleted Countries</div>
-
-            <div className="deleted-country-cards-container">
-              {state.deletedCountries.map((country, index) => (
-                <CountryCard
-                  key={index}
-                  name={country.name}
-                  capital={country.capital}
-                  population={country.population}
-                  image={countryImage}
-                  likes={country.likes}
-                  isDeleted={true}
-                  onRestore={() => handleRestore(index)}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </section>
-    </>
-  );
-};
+                <div className="picdiv">
+                  <img className="pic" src={countryImage} alt="Country" />
+                  <h2>Explore countries around the world</h2>
+                </div>
+        
+                <div className="text">Visit Beautiful Places</div>
+        
+                <h3 className="countrylist" onClick={toggleCountries}>
+                  List of Countries
+                </h3>
+        
+                <form onSubmit={addCountry}>
+                  <div>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="Country name"
+                      required
+                    />
+                    {errors.name && <div className="error">{errors.name}</div>}
+                  </div>
+        
+                  <div>
+                    <input
+                      type="text"
+                      name="capital"
+                      value={formData.capital}
+                      onChange={handleInputChange}
+                      placeholder="Capital"
+                      required
+                    />
+                    {errors.capital && <div className="error">{errors.capital}</div>}
+                  </div>
+        
+                  <div>
+                    <input
+                      type="text"
+                      name="population"
+                      value={formData.population}
+                      onChange={handleInputChange}
+                      placeholder="Population"
+                      required
+                    />
+                    {errors.population && <div className="error">{errors.population}</div>}
+                  </div>
+        
+                  <button type="submit">Add Country</button>
+                </form>
+        
+                {showCountries && (
+                  <>
+                    <button onClick={handleSort}>
+                      Sort by Likes ({state.sortOrder === 'asc' ? 'Ascending' : 'Descending'})
+                    </button>
+        
+                    <div className="country-cards-container">
+                      {state.countries.map((country, index) => (
+                        <CountryCard
+                          key={index}
+                          name={country.name}
+                          capital={country.capital}
+                          population={country.population}
+                          image={countryImage}
+                          likes={country.likes}
+                          onLike={() => handleLike(index)}
+                          onDelete={() => handleDelete(index)}
+                          isDeleted={country.deleted}
+                        />
+                      ))}
+                    </div>
+        
+                    <div className="deleted-country-article">Deleted Countries</div>
+        
+                    <div className="deleted-country-cards-container">
+                      {state.deletedCountries.map((country, index) => (
+                        <CountryCard
+                          key={index}
+                          name={country.name}
+                          capital={country.capital}
+                          population={country.population}
+                          image={countryImage}
+                          likes={country.likes}
+                          isDeleted={true}
+                          onRestore={() => handleRestore(index)}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </section>
+            </>
+          );
+        };
+        
+        
 
 Hero.displayName = "Hero component";
+
 export default Hero;

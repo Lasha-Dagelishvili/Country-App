@@ -58,6 +58,11 @@ form input {
   width: 200px;
 }
 
+.error {
+  margin-bottom: 10px;
+  color: red;
+}
+
 form button {
   padding: 10px;
   font-size: 16px;
