@@ -3,6 +3,33 @@ import countryImage from '@/pages/home/components/hero/pic/world.jpg';
 import CountryCard from '@/pages/home/components/country/country';
 import { useEffect, useReducer, useState } from 'react';
 
+interface HeroProps {
+  lang?: 'En' | 'Geo';
+}
+
+const translations = {
+  En: {
+    header: 'Countries App',
+    title: 'Explore countries around the world',
+    visit: 'Visit Beautiful Places',
+    countryList: 'List of Countries',
+    addCountry: 'Add Country',
+    populationPlaceholder: 'Population',
+    countryname: 'Country name',
+    capital: 'capital'
+  },
+  Geo: {
+    header: 'ქვეყნების აპი',
+    title: 'გამოიკვლიეთ ქვეყნები მსოფლიოში',
+    visit: 'ეწვიეთ ლამაზ ადგილებს',
+    countryList: 'ქვეყნების სია',
+    addCountry: 'დაამატეთ ქვეყანა',
+    populationPlaceholder: 'მოსახლეობა',
+    countryname: 'ქვეყნის სახელი',
+    capital: 'დედაქალაქი'
+  }
+};
+
 type Action = 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   | { type: 'SET_COUNTRIES'; payload: any[] }
@@ -82,7 +109,9 @@ const reducer = (state: State, action: Action): State => {
 };  
 
 
-const Hero: React.FC = () => {
+const Hero: React.FC<HeroProps> = ({ lang = 'En' }) =>{
+  const t = translations[lang];
+
   const [showCountries, setShowCountries] = useState(false);
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -137,8 +166,8 @@ const Hero: React.FC = () => {
       deleted: false,
     };
     dispatch({ type: 'ADD_COUNTRY', payload: newCountry });
-    setFormData({ name: '', capital: '', population: '' }); // Clear the form
-    setErrors({ name: '', capital: '', population: '' }); // Reset errors
+    setFormData({ name: '', capital: '', population: '' });
+    setErrors({ name: '', capital: '', population: '' });
   };
 
   const toggleCountries = () => setShowCountries(!showCountries);
@@ -180,19 +209,16 @@ const Hero: React.FC = () => {
           return (
             <>
               <section>
-                <div className="countries-artickle">Countries App</div>
-        
+                <div className="countries-artickle">{t.header}</div>
                 <div className="picdiv">
                   <img className="pic" src={countryImage} alt="Country" />
-                  <h2>Explore countries around the world</h2>
+                  <h2>{t.title}</h2>
                 </div>
-        
-                <div className="text">Visit Beautiful Places</div>
-        
+                <div className="text">{t.visit}</div> 
                 <h3 className="countrylist" onClick={toggleCountries}>
-                  List of Countries
+                  {t.countryList}
                 </h3>
-        
+
                 <form onSubmit={addCountry}>
                   <div>
                     <input
@@ -200,19 +226,19 @@ const Hero: React.FC = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="Country name"
+                      placeholder={t.countryname}
                       required
                     />
                     {errors.name && <div className="error">{errors.name}</div>}
                   </div>
-        
+
                   <div>
                     <input
                       type="text"
                       name="capital"
                       value={formData.capital}
                       onChange={handleInputChange}
-                      placeholder="Capital"
+                      placeholder={t.capital}
                       required
                     />
                     {errors.capital && <div className="error">{errors.capital}</div>}
@@ -224,13 +250,13 @@ const Hero: React.FC = () => {
                       name="population"
                       value={formData.population}
                       onChange={handleInputChange}
-                      placeholder="Population"
+                      placeholder={t.populationPlaceholder}
                       required
                     />
                     {errors.population && <div className="error">{errors.population}</div>}
                   </div>
         
-                  <button type="submit">Add Country</button>
+                  <button type="submit">{t.addCountry}</button>
                 </form>
         
                 {showCountries && (
