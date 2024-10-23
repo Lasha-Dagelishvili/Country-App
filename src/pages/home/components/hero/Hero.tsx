@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import '@/pages/home/components/hero/Hero.css';
 import countryImage from '@/pages/home/components/hero/pic/world.jpg';
 import CountryCard from '@/pages/home/components/country/country';
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useState, ChangeEvent } from 'react';
 
 interface HeroProps {
   lang?: 'En' | 'Geo';
@@ -31,9 +32,7 @@ const translations = {
 };
 
 type Action = 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   | { type: 'SET_COUNTRIES'; payload: any[] }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   | { type: 'ADD_COUNTRY'; payload: any }
   | { type: 'DELETE_COUNTRY'; payload: number }
   | { type: 'RESTORE_COUNTRY'; payload: number }
@@ -41,9 +40,7 @@ type Action =
   | { type: 'SORT_COUNTRIES'; payload: 'asc' | 'desc' };
 
 interface State {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   countries: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deletedCountries: any[];
   sortOrder: 'asc' | 'desc';
 }
@@ -108,8 +105,7 @@ const reducer = (state: State, action: Action): State => {
   }
 };  
 
-
-const Hero: React.FC<HeroProps> = ({ lang = 'En' }) =>{
+const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
   const t = translations[lang];
 
   const [showCountries, setShowCountries] = useState(false);
@@ -119,16 +115,19 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) =>{
     name: '',
     capital: '',
     population: '',
+    image: null as File | null,
   });
+
   const [errors, setErrors] = useState({
     name: '',
     capital: '',
     population: '',
+    image: '',
   });
 
   const validateForm = () => {
     let isValid = true;
-    const newErrors = { name: '', capital: '', population: '' };
+    const newErrors = { name: '', capital: '', population: '', image: '' };
 
     if (formData.name.trim().length < 3) {
       newErrors.name = 'Country name must be at least 3 characters long';
@@ -145,6 +144,14 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) =>{
       isValid = false;
     }
 
+    if (!formData.image) {
+      newErrors.image = 'Please upload an image';
+      isValid = false;
+    } else if (!['image/jpeg', 'image/png'].includes(formData.image.type)) {
+      newErrors.image = 'Only JPG or PNG files are allowed';
+      isValid = false;
+    }
+
     setErrors(newErrors);
     return isValid;
   };
@@ -154,30 +161,40 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) =>{
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData({ ...formData, image: file });
+  };
+
   const addCountry = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const newCountry = {
-      name: formData.name.trim(),
-      capital: formData.capital.trim(),
-      population: formData.population,
-      likes: 0,
-      deleted: false,
+    const reader = new FileReader();
+    reader.readAsDataURL(formData.image as Blob);
+    reader.onloadend = () => {
+      const base64Image = reader.result as string;
+      const newCountry = {
+        name: formData.name.trim(),
+        capital: formData.capital.trim(),
+        population: formData.population,
+        image: base64Image,
+        likes: 0,
+        deleted: false,
+      };
+
+      dispatch({ type: 'ADD_COUNTRY', payload: newCountry });
+      setFormData({ name: '', capital: '', population: '', image: null });
+      setErrors({ name: '', capital: '', population: '', image: '' });
     };
-    dispatch({ type: 'ADD_COUNTRY', payload: newCountry });
-    setFormData({ name: '', capital: '', population: '' });
-    setErrors({ name: '', capital: '', population: '' });
   };
 
   const toggleCountries = () => setShowCountries(!showCountries);
-
 
   useEffect(() => {
     fetch('https://restcountries.com/v3.1/all')
       .then(response => response.json())
       .then(data => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const countryData = data.map((country: any) => ({
           name: country.name.common,
           capital: country.capital ? country.capital[0] : 'No Capital',
@@ -206,105 +223,113 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) =>{
     dispatch({ type: 'RESTORE_COUNTRY', payload: index });
   };
 
-          return (
-            <>
-              <section>
-                <div className="countries-artickle">{t.header}</div>
-                <div className="picdiv">
-                  <img className="pic" src={countryImage} alt="Country" />
-                  <h2>{t.title}</h2>
-                </div>
-                <div className="text">{t.visit}</div> 
-                <h3 className="countrylist" onClick={toggleCountries}>
-                  {t.countryList}
-                </h3>
+  return (
+    <>
+      <section>
+        <div className="countries-artickle">{t.header}</div>
+        <div className="picdiv">
+          <img className="pic" src={countryImage} alt="Country" />
+          <h2>{t.title}</h2>
+        </div>
+        <div className="text">{t.visit}</div> 
+        <h3 className="countrylist" onClick={toggleCountries}>
+          {t.countryList}
+        </h3>
 
-                <form onSubmit={addCountry}>
-                  <div>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder={t.countryname}
-                      required
-                    />
-                    {errors.name && <div className="error">{errors.name}</div>}
-                  </div>
+        <form onSubmit={addCountry}>
+          <div>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              placeholder={t.countryname}
+              required
+            />
+            {errors.name && <div className="error">{errors.name}</div>}
+          </div>
 
-                  <div>
-                    <input
-                      type="text"
-                      name="capital"
-                      value={formData.capital}
-                      onChange={handleInputChange}
-                      placeholder={t.capital}
-                      required
-                    />
-                    {errors.capital && <div className="error">{errors.capital}</div>}
-                  </div>
-        
-                  <div>
-                    <input
-                      type="text"
-                      name="population"
-                      value={formData.population}
-                      onChange={handleInputChange}
-                      placeholder={t.populationPlaceholder}
-                      required
-                    />
-                    {errors.population && <div className="error">{errors.population}</div>}
-                  </div>
-        
-                  <button type="submit">{t.addCountry}</button>
-                </form>
-        
-                {showCountries && (
-                  <>
-                    <button onClick={handleSort}>
-                      Sort by Likes ({state.sortOrder === 'asc' ? 'Ascending' : 'Descending'})
-                    </button>
-        
-                    <div className="country-cards-container">
-                      {state.countries.map((country, index) => (
-                        <CountryCard
-                          key={index}
-                          name={country.name}
-                          capital={country.capital}
-                          population={country.population}
-                          image={countryImage}
-                          likes={country.likes}
-                          onLike={() => handleLike(index)}
-                          onDelete={() => handleDelete(index)}
-                          isDeleted={country.deleted}
-                        />
-                      ))}
-                    </div>
-        
-                    <div className="deleted-country-article">Deleted Countries</div>
-        
-                    <div className="deleted-country-cards-container">
-                      {state.deletedCountries.map((country, index) => (
-                        <CountryCard
-                          key={index}
-                          name={country.name}
-                          capital={country.capital}
-                          population={country.population}
-                          image={countryImage}
-                          likes={country.likes}
-                          isDeleted={true}
-                          onRestore={() => handleRestore(index)}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
-              </section>
-            </>
-          );
-        };
-        
-        
+          <div>
+            <input
+              type="text"
+              name="capital"
+              value={formData.capital}
+              onChange={handleInputChange}
+              placeholder={t.capital}
+              required
+            />
+            {errors.capital && <div className="error">{errors.capital}</div>}
+          </div>
+
+          <div>
+            <input
+              type="text"
+              name="population"
+              value={formData.population}
+              onChange={handleInputChange}
+              placeholder={t.populationPlaceholder}
+              required
+            />
+            {errors.population && <div className="error">{errors.population}</div>}
+          </div>
+
+          <div>
+            <input
+              type="file"
+              accept="image/jpeg, image/png"
+              onChange={handleFileChange}
+              required
+            />
+            {errors.image && <div className="error">{errors.image}</div>}
+          </div>
+
+          <button type="submit">{t.addCountry}</button>
+        </form>
+
+        {showCountries && (
+          <>
+            <button onClick={handleSort}>
+              Sort by Likes ({state.sortOrder === 'asc' ? 'Ascending' : 'Descending'})
+            </button>
+
+            <div className="country-cards-container">
+              {state.countries.map((country, index) => (
+                <CountryCard
+                  key={index}
+                  name={country.name}
+                  capital={country.capital}
+                  population={country.population}
+                  image={country.image}
+                  likes={country.likes}
+                  onLike={() => handleLike(index)}
+                  onDelete={() => handleDelete(index)}
+                  isDeleted={country.deleted}
+                />
+              ))}
+            </div>
+
+            <div className="deleted-country-article">Deleted Countries</div>
+
+            <div className="deleted-country-cards-container">
+              {state.deletedCountries.map((country, index) => (
+                <CountryCard
+                  key={index}
+                  name={country.name}
+                  capital={country.capital}
+                  population={country.population}
+                  image={country.image}
+                  likes={country.likes}
+                  isDeleted={true}
+                  onRestore={() => handleRestore(index)}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </section>
+    </>
+  );
+};
 
 Hero.displayName = "Hero component";
 
