@@ -1,7 +1,7 @@
-import ContactInformation from "../../components/information";
+import ContactInformation from '../../components/information'
 
 const ContactInformationView = () => {
-  return <ContactInformation />;
-};
+    return <ContactInformation />
+}
 
-export default ContactInformationView;
+export default ContactInformationView

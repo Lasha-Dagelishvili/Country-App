@@ -1,15 +1,15 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense } from 'react'
 
-const LazyArticleHero = lazy(() => import("@/pages/home/components/hero/Hero"));
+const LazyArticleHero = lazy(() => import('@/pages/home/components/hero/Hero'))
 
 const ArticlesListView = () => {
-  return (
-    <>
-      <Suspense fallback={<div>Loading Hero...</div>}>
-        <LazyArticleHero />
-      </Suspense>
-    </>
-  );
-};
+    return (
+        <>
+            <Suspense fallback={<div>Loading Hero...</div>}>
+                <LazyArticleHero />
+            </Suspense>
+        </>
+    )
+}
 
-export default ArticlesListView;
+export default ArticlesListView
