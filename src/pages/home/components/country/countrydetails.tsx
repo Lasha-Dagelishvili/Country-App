@@ -90,4 +90,4 @@ const CountryDetails = () => {
     )
 }
 
-export default CountryDetails
+export default CountryDetails;
