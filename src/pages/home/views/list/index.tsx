@@ -1,6 +1,6 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense } from "react";
 
-const LazyArticleHero = lazy(() => import('@/pages/home/components/hero/Hero'));
+const LazyArticleHero = lazy(() => import("@/pages/home/components/hero/Hero"));
 
 const ArticlesListView = () => {
   return (

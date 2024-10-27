@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import './contactform.css';
-
+import React, { useState } from "react";
+import "./contactform.css";
 
 const ContactInformation = () => {
-
   const [formData, setFormData] = useState({
-    name: '',
-    surname: '',
-    email: '',
-    message: ''
+    name: "",
+    surname: "",
+    email: "",
+    message: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -23,23 +23,23 @@ const ContactInformation = () => {
     console.log(formData);
 
     setFormData({
-      name: '',
-      surname: '',
-      email: '',
-      message: ''
+      name: "",
+      surname: "",
+      email: "",
+      message: "",
     });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
     const target = e.target as HTMLElement;
-    if (e.key === 'Enter' && target.tagName !== 'TEXTAREA') {
+    if (e.key === "Enter" && target.tagName !== "TEXTAREA") {
       e.preventDefault();
       console.log(formData);
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '0 auto' }}>
+    <div style={{ maxWidth: "400px", margin: "0 auto" }}>
       <h2>Contact Us</h2>
       <form onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
         <label htmlFor="name">Name:</label>
