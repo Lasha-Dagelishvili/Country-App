@@ -40,7 +40,7 @@ const translations = {
         populationPlaceholder: 'Population',
         countryname: 'Country name',
         capital: 'Capital',
-        changeLang: 'Change Language'
+        changeLang: 'Change Language',
     },
     Geo: {
         header: 'ქვეყნების აპი',
@@ -51,7 +51,7 @@ const translations = {
         populationPlaceholder: 'მოსახლეობა',
         countryname: 'ქვეყნის სახელი',
         capital: 'დედაქალაქი',
-        changeLang: 'ენის შეცვლა'
+        changeLang: 'ენის შეცვლა',
     },
 }
 
@@ -69,7 +69,10 @@ const reducer = (state: State, action: Action): State => {
             return { ...state, countries: [...state.countries, action.payload] }
         case 'DELETE_COUNTRY': {
             const updatedCountries = [...state.countries]
-            const countryToDelete = { ...updatedCountries[action.payload], deleted: true }
+            const countryToDelete = {
+                ...updatedCountries[action.payload],
+                deleted: true,
+            }
             updatedCountries.splice(action.payload, 1)
             return {
                 ...state,
@@ -78,7 +81,10 @@ const reducer = (state: State, action: Action): State => {
             }
         }
         case 'RESTORE_COUNTRY': {
-            const restoredCountry = { ...state.deletedCountries[action.payload], deleted: false }
+            const restoredCountry = {
+                ...state.deletedCountries[action.payload],
+                deleted: false,
+            }
             const updatedDeletedCountries = state.deletedCountries.filter(
                 (_, idx) => idx !== action.payload,
             )
@@ -94,10 +100,16 @@ const reducer = (state: State, action: Action): State => {
             return { ...state, countries: updatedCountries }
         }
         case 'SORT_COUNTRIES': {
-            const sortedCountries = [...state.countries].sort((a, b) => 
-                action.payload === 'asc' ? a.likes - b.likes : b.likes - a.likes
+            const sortedCountries = [...state.countries].sort((a, b) =>
+                action.payload === 'asc'
+                    ? a.likes - b.likes
+                    : b.likes - a.likes,
             )
-            return { ...state, countries: sortedCountries, sortOrder: action.payload }
+            return {
+                ...state,
+                countries: sortedCountries,
+                sortOrder: action.payload,
+            }
         }
         default:
             return state
@@ -135,11 +147,15 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
         }
 
         if (formData.capital.trim().length < 2) {
-            newErrors.capital = 'Capital name must be at least 2 characters long'
+            newErrors.capital =
+                'Capital name must be at least 2 characters long'
             isValid = false
         }
 
-        if (!/^\d+$/.test(formData.population) || parseInt(formData.population) <= 0) {
+        if (
+            !/^\d+$/.test(formData.population) ||
+            parseInt(formData.population) <= 0
+        ) {
             newErrors.population = 'Population must be a positive number'
             isValid = false
         }
@@ -203,7 +219,9 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
             .then((data) => {
                 const countryData: Country[] = data.map((country: any) => ({
                     name: country.name.common,
-                    capital: country.capital ? country.capital[0] : 'No Capital',
+                    capital: country.capital
+                        ? country.capital[0]
+                        : 'No Capital',
                     population: country.population.toLocaleString(),
                     image: '',
                     likes: 0,
@@ -236,10 +254,16 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
     return (
         <section>
             <div className="language-buttons">
-                <button onClick={() => handleLangChange('En')} disabled={currentLang === 'En'}>
+                <button
+                    onClick={() => handleLangChange('En')}
+                    disabled={currentLang === 'En'}
+                >
                     English
                 </button>
-                <button onClick={() => handleLangChange('Geo')} disabled={currentLang === 'Geo'}>
+                <button
+                    onClick={() => handleLangChange('Geo')}
+                    disabled={currentLang === 'Geo'}
+                >
                     ქართული
                 </button>
             </div>
@@ -276,7 +300,9 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
                         placeholder={t.capital}
                         required
                     />
-                    {errors.capital && <div className="error">{errors.capital}</div>}
+                    {errors.capital && (
+                        <div className="error">{errors.capital}</div>
+                    )}
                 </div>
 
                 <div>
@@ -288,7 +314,9 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
                         placeholder={t.populationPlaceholder}
                         required
                     />
-                    {errors.population && <div className="error">{errors.population}</div>}
+                    {errors.population && (
+                        <div className="error">{errors.population}</div>
+                    )}
                 </div>
 
                 <div>
@@ -298,7 +326,9 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
                         onChange={handleFileChange}
                         required
                     />
-                    {errors.image && <div className="error">{errors.image}</div>}
+                    {errors.image && (
+                        <div className="error">{errors.image}</div>
+                    )}
                 </div>
 
                 <button type="submit">{t.addCountry}</button>
@@ -307,7 +337,9 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
             {showCountries && (
                 <>
                     <button onClick={handleSort}>
-                        Sort by Likes ({state.sortOrder === 'asc' ? 'Ascending' : 'Descending'})
+                        Sort by Likes (
+                        {state.sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+                        )
                     </button>
 
                     <div className="country-cards-container">
@@ -326,7 +358,9 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
                         ))}
                     </div>
 
-                    <div className="deleted-country-article">Deleted Countries</div>
+                    <div className="deleted-country-article">
+                        Deleted Countries
+                    </div>
 
                     <div className="deleted-country-cards-container">
                         {state.deletedCountries.map((country, index) => (

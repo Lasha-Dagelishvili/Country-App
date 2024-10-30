@@ -25,7 +25,7 @@ function App() {
                 <Route path="/" element={<ArticlesListView />} />
                 <Route path="about" element={<AboutView />} />
                 <Route path="contact" element={<ContactInformationView />} />
-                <Route path='Test' element={<TestView />} />
+                <Route path="Test" element={<TestView />} />
 
                 <Route path="countries" element={<Hero />} />
                 <Route path="country/:name" element={<CountryDetails />} />
