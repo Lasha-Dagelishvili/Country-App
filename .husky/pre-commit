@@ -1,5 +1,4 @@
 
 yarn ts-check
 yarn lint
-yarn prettier
 yarn format

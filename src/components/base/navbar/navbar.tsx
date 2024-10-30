@@ -26,6 +26,9 @@ const Navbar: FC = () => {
                     <NavLink className={'nav_items'} to="/contact">
                         Contact
                     </NavLink>
+                    <NavLink className={'nav_items'} to="/Test">
+                        Test
+                    </NavLink>
                 </div>
             </nav>
         </header>

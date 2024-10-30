@@ -1,0 +1,32 @@
+
+.otp-container {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 120px;
+}
+
+.otp-input {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    text-align: center;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.otp-input:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+}
+
+@media (max-width: 600px) {
+    .otp-input {
+        width: 35px;
+        height: 35px;
+        font-size: 1.2rem;
+    }
+}

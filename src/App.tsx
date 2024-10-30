@@ -8,6 +8,7 @@ import NotFoundPage from './pages/404'
 import { Suspense } from 'react'
 import CountryDetails from './pages/home/components/country/countrydetails'
 import Hero from './pages/home/components/hero/Hero'
+import TestView from './pages/testpage/views/about'
 
 function App() {
     return (
@@ -24,6 +25,7 @@ function App() {
                 <Route path="/" element={<ArticlesListView />} />
                 <Route path="about" element={<AboutView />} />
                 <Route path="contact" element={<ContactInformationView />} />
+                <Route path='Test' element={<TestView />} />
 
                 <Route path="countries" element={<Hero />} />
                 <Route path="country/:name" element={<CountryDetails />} />
