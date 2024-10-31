@@ -42,7 +42,9 @@ const OTPInput: React.FC<OTPInputProps> = ({ numInputs }) => {
 
     const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
         event.preventDefault()
-        const pastedData = event.clipboardData.getData('Text').slice(0, numInputs)
+        const pastedData = event.clipboardData
+            .getData('Text')
+            .slice(0, numInputs)
 
         if (/^\d*$/.test(pastedData)) {
             const newOtp = Array(numInputs).fill('')

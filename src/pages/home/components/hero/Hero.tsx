@@ -217,11 +217,13 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
         fetch('https://restcountries.com/v3.1/all')
             .then((response) => response.json())
             .then((data) => {
-                const countryData: Country[] = data.map((country: any) => ({
+                const countryData: Country[] = data.map((country: {
+                    name: { common: string },
+                    capital: string[],
+                    population: number
+                }) => ({
                     name: country.name.common,
-                    capital: country.capital
-                        ? country.capital[0]
-                        : 'No Capital',
+                    capital: country.capital ? country.capital[0] : 'No Capital',
                     population: country.population.toLocaleString(),
                     image: '',
                     likes: 0,
@@ -274,9 +276,13 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
                 <h2>{t.title}</h2>
             </div>
             <div className="text">{t.visit}</div>
-            <h3 className="countrylist" onClick={toggleCountries}>
+            <button
+                className="countrylist"
+                onClick={toggleCountries}
+                aria-expanded={showCountries}
+            >
                 {t.countryList}
-            </h3>
+            </button>
 
             <form onSubmit={addCountry}>
                 <div>
