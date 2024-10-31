@@ -217,18 +217,22 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
         fetch('https://restcountries.com/v3.1/all')
             .then((response) => response.json())
             .then((data) => {
-                const countryData: Country[] = data.map((country: {
-                    name: { common: string },
-                    capital: string[],
-                    population: number
-                }) => ({
-                    name: country.name.common,
-                    capital: country.capital ? country.capital[0] : 'No Capital',
-                    population: country.population.toLocaleString(),
-                    image: '',
-                    likes: 0,
-                    deleted: false,
-                }))
+                const countryData: Country[] = data.map(
+                    (country: {
+                        name: { common: string }
+                        capital: string[]
+                        population: number
+                    }) => ({
+                        name: country.name.common,
+                        capital: country.capital
+                            ? country.capital[0]
+                            : 'No Capital',
+                        population: country.population.toLocaleString(),
+                        image: '',
+                        likes: 0,
+                        deleted: false,
+                    }),
+                )
                 dispatch({ type: 'SET_COUNTRIES', payload: countryData })
             })
             .catch((error) => console.error('Error fetching countries:', error))
