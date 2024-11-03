@@ -1,19 +1,19 @@
-import '@/pages/home/components/hero/Hero.css'
-import countryImage from '@/pages/home/components/hero/pic/world.jpg'
-import CountryCard from '@/pages/home/components/country/country'
-import { useEffect, useReducer, useState, ChangeEvent } from 'react'
+import '@/pages/home/components/hero/Hero.css';
+import countryImage from '@/pages/home/components/hero/pic/world.jpg';
+import CountryCard from '@/pages/home/components/country/country';
+import { useEffect, useReducer, useState, ChangeEvent } from 'react';
 
 interface HeroProps {
-    lang?: 'En' | 'Geo'
+    lang?: 'En' | 'Geo';
 }
 
 interface Country {
-    name: string
-    capital: string
-    population: string
-    image: string
-    likes: number
-    deleted: boolean
+    name: string;
+    capital: string;
+    population: string;
+    image: string;
+    likes: number;
+    deleted: boolean;
 }
 
 type Action =
@@ -23,174 +23,135 @@ type Action =
     | { type: 'RESTORE_COUNTRY'; payload: number }
     | { type: 'LIKE_COUNTRY'; payload: number }
     | { type: 'SORT_COUNTRIES'; payload: 'asc' | 'desc' }
+    | { type: 'EDIT_COUNTRY'; payload: { index: number; country: Country } };
 
 interface State {
-    countries: Country[]
-    deletedCountries: Country[]
-    sortOrder: 'asc' | 'desc'
+    countries: Country[];
+    deletedCountries: Country[];
+    sortOrder: 'asc' | 'desc';
 }
 
 const translations = {
     En: {
-        header: 'Countries App',
-        title: 'Explore countries around the world',
-        visit: 'Visit Beautiful Places',
-        countryList: 'List of Countries',
-        addCountry: 'Add Country',
-        populationPlaceholder: 'Population',
-        countryname: 'Country name',
-        capital: 'Capital',
-        changeLang: 'Change Language',
+        header: "Countries of the World",
+        title: "Explore Countries",
+        visit: "Discover amazing countries from around the world!",
+        countryList: "Show Countries",
+        countryname: "Country Name",
+        capital: "Capital",
+        populationPlaceholder: "Population",
+        addCountry: "Add Country",
     },
     Geo: {
-        header: 'ქვეყნების აპი',
-        title: 'გამოიკვლიეთ ქვეყნები მსოფლიოში',
-        visit: 'ეწვიეთ ლამაზ ადგილებს',
-        countryList: 'ქვეყნების სია',
-        addCountry: 'დაამატეთ ქვეყანა',
-        populationPlaceholder: 'მოსახლეობა',
-        countryname: 'ქვეყნის სახელი',
-        capital: 'დედაქალაქი',
-        changeLang: 'ენის შეცვლა',
+        header: "მსოფლიოს ქვეყნები",
+        title: "ქვეყნებთან გაცნობა",
+        visit: "აღმოაჩინე საოცარი ქვეყნები მთელს მსოფლიოში!",
+        countryList: "ქვეყნების სია",
+        countryname: "ქვეყნის სახელი",
+        capital: "დედაქალაქი",
+        populationPlaceholder: "მოსახლეობა",
+        addCountry: "ქვეყნის დამატება",
     },
-}
+};
 
 const initialState: State = {
     countries: [],
     deletedCountries: [],
     sortOrder: 'asc',
-}
+};
 
 const reducer = (state: State, action: Action): State => {
     switch (action.type) {
         case 'SET_COUNTRIES':
-            return { ...state, countries: action.payload }
+            return { ...state, countries: action.payload };
         case 'ADD_COUNTRY':
-            return { ...state, countries: [...state.countries, action.payload] }
+            return { ...state, countries: [...state.countries, action.payload] };
         case 'DELETE_COUNTRY': {
-            const updatedCountries = [...state.countries]
+            const updatedCountries = [...state.countries];
             const countryToDelete = {
                 ...updatedCountries[action.payload],
                 deleted: true,
-            }
-            updatedCountries.splice(action.payload, 1)
+            };
+            updatedCountries.splice(action.payload, 1);
             return {
                 ...state,
                 countries: updatedCountries,
                 deletedCountries: [...state.deletedCountries, countryToDelete],
-            }
+            };
         }
         case 'RESTORE_COUNTRY': {
             const restoredCountry = {
                 ...state.deletedCountries[action.payload],
                 deleted: false,
-            }
+            };
             const updatedDeletedCountries = state.deletedCountries.filter(
-                (_, idx) => idx !== action.payload,
-            )
+                (_, idx) => idx !== action.payload
+            );
             return {
                 ...state,
                 countries: [...state.countries, restoredCountry],
                 deletedCountries: updatedDeletedCountries,
-            }
+            };
         }
         case 'LIKE_COUNTRY': {
-            const updatedCountries = [...state.countries]
-            updatedCountries[action.payload].likes += 0.5
-            return { ...state, countries: updatedCountries }
+            const updatedCountries = [...state.countries];
+            updatedCountries[action.payload].likes += 0.5;
+            return { ...state, countries: updatedCountries };
         }
         case 'SORT_COUNTRIES': {
             const sortedCountries = [...state.countries].sort((a, b) =>
                 action.payload === 'asc'
                     ? a.likes - b.likes
-                    : b.likes - a.likes,
-            )
+                    : b.likes - a.likes
+            );
             return {
                 ...state,
                 countries: sortedCountries,
                 sortOrder: action.payload,
-            }
+            };
+        }
+        case 'EDIT_COUNTRY': {
+            const updatedCountries = [...state.countries];
+            updatedCountries[action.payload.index] = action.payload.country;
+            return { ...state, countries: updatedCountries };
         }
         default:
-            return state
+            return state;
     }
-}
+};
 
 const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
-    const [currentLang, setCurrentLang] = useState<'En' | 'Geo'>(lang)
-    const t = translations[currentLang]
+    const [editIndex, setEditIndex] = useState<number | null>(null);
+    const [currentLang, setCurrentLang] = useState<'En' | 'Geo'>(lang);
+    const t = translations[currentLang];
 
-    const [showCountries, setShowCountries] = useState(false)
-    const [state, dispatch] = useReducer(reducer, initialState)
-
+    const [showCountries, setShowCountries] = useState(false);
+    const [state, dispatch] = useReducer(reducer, initialState);
     const [formData, setFormData] = useState({
         name: '',
         capital: '',
         population: '',
         image: null as File | null,
-    })
-
-    const [errors, setErrors] = useState({
-        name: '',
-        capital: '',
-        population: '',
-        image: '',
-    })
+    });
 
     const validateForm = () => {
-        let isValid = true
-        const newErrors = { name: '', capital: '', population: '', image: '' }
-
-        if (formData.name.trim().length < 3) {
-            newErrors.name = 'Country name must be at least 3 characters long'
-            isValid = false
-        }
-
-        if (formData.capital.trim().length < 2) {
-            newErrors.capital =
-                'Capital name must be at least 2 characters long'
-            isValid = false
-        }
-
-        if (
-            !/^\d+$/.test(formData.population) ||
-            parseInt(formData.population) <= 0
-        ) {
-            newErrors.population = 'Population must be a positive number'
-            isValid = false
-        }
-
-        if (!formData.image) {
-            newErrors.image = 'Please upload an image'
-            isValid = false
-        } else if (!['image/jpeg', 'image/png'].includes(formData.image.type)) {
-            newErrors.image = 'Only JPG or PNG files are allowed'
-            isValid = false
-        }
-
-        setErrors(newErrors)
-        return isValid
-    }
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target
-        setFormData({ ...formData, [name]: value })
-    }
+        return formData.name && formData.capital && formData.population && formData.image;
+    };
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0] || null
-        setFormData({ ...formData, image: file })
-    }
+        const file = e.target.files?.[0] || null;
+        setFormData((prev) => ({ ...prev, image: file }));
+    };
 
     const addCountry = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        if (!validateForm()) return
+        e.preventDefault();
+        if (!validateForm()) return;
 
-        const reader = new FileReader()
-        reader.readAsDataURL(formData.image as Blob)
+        const reader = new FileReader();
+        reader.readAsDataURL(formData.image as Blob);
 
         reader.onloadend = () => {
-            const base64Image = reader.result as string
+            const base64Image = reader.result as string;
 
             const newCountry: Country = {
                 name: formData.name.trim(),
@@ -199,159 +160,110 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
                 image: base64Image,
                 likes: 0,
                 deleted: false,
+            };
+
+            if (editIndex !== null) {
+                dispatch({
+                    type: 'EDIT_COUNTRY',
+                    payload: { index: editIndex, country: newCountry },
+                });
+                setEditIndex(null);
+            } else {
+                dispatch({ type: 'ADD_COUNTRY', payload: newCountry });
             }
 
-            dispatch({ type: 'ADD_COUNTRY', payload: newCountry })
-            setFormData({ name: '', capital: '', population: '', image: null })
-            setErrors({ name: '', capital: '', population: '', image: '' })
-        }
-    }
-
-    const toggleCountries = () => setShowCountries(!showCountries)
-
-    const handleLangChange = (lang: 'En' | 'Geo') => {
-        setCurrentLang(lang)
-    }
+            setFormData({ name: '', capital: '', population: '', image: null });
+        };
+    };
 
     useEffect(() => {
-        fetch('https://restcountries.com/v3.1/all')
+        fetch('http://localhost:3001/countries')
             .then((response) => response.json())
             .then((data) => {
-                const countryData: Country[] = data.map(
-                    (country: {
-                        name: { common: string }
-                        capital: string[]
-                        population: number
-                    }) => ({
-                        name: country.name.common,
-                        capital: country.capital
-                            ? country.capital[0]
-                            : 'No Capital',
-                        population: country.population.toLocaleString(),
-                        image: '',
-                        likes: 0,
-                        deleted: false,
-                    }),
-                )
-                dispatch({ type: 'SET_COUNTRIES', payload: countryData })
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const countryData = data.map((country: any) => ({
+                    ...country,
+                    deleted: false,
+                }));
+                dispatch({ type: 'SET_COUNTRIES', payload: countryData });
             })
-            .catch((error) => console.error('Error fetching countries:', error))
-    }, [])
+            .catch((error) => console.error('Error fetching countries:', error));
+    }, []);
+    
 
     const handleLike = (index: number) => {
-        dispatch({ type: 'LIKE_COUNTRY', payload: index })
-    }
+        dispatch({ type: 'LIKE_COUNTRY', payload: index });
+    };
 
     const handleSort = () => {
         dispatch({
             type: 'SORT_COUNTRIES',
             payload: state.sortOrder === 'asc' ? 'desc' : 'asc',
-        })
-    }
+        });
+    };
 
     const handleDelete = (index: number) => {
-        dispatch({ type: 'DELETE_COUNTRY', payload: index })
-    }
+        dispatch({ type: 'DELETE_COUNTRY', payload: index });
+    };
 
-    const handleRestore = (index: number) => {
-        dispatch({ type: 'RESTORE_COUNTRY', payload: index })
-    }
+    const handleEdit = (index: number) => {
+        const countryToEdit = state.countries[index];
+        setFormData({
+            name: countryToEdit.name,
+            capital: countryToEdit.capital,
+            population: countryToEdit.population,
+            image: null,
+        });
+        setEditIndex(index);
+    };
+
+    const handleLangChange = (lang: 'En' | 'Geo') => {
+        setCurrentLang(lang);
+    };
+
+    const toggleCountries = () => {
+        setShowCountries(!showCountries);
+    };
 
     return (
         <section>
             <div className="language-buttons">
-                <button
-                    onClick={() => handleLangChange('En')}
-                    disabled={currentLang === 'En'}
-                >
-                    English
-                </button>
-                <button
-                    onClick={() => handleLangChange('Geo')}
-                    disabled={currentLang === 'Geo'}
-                >
-                    ქართული
-                </button>
+                <button onClick={() => handleLangChange('En')} disabled={currentLang === 'En'}>English</button>
+                <button onClick={() => handleLangChange('Geo')} disabled={currentLang === 'Geo'}>ქართული</button>
             </div>
-
             <div className="countries-article">{t.header}</div>
             <div className="picdiv">
                 <img className="pic" src={countryImage} alt="Country" />
                 <h2>{t.title}</h2>
             </div>
             <div className="text">{t.visit}</div>
-            <button
-                className="countrylist"
-                onClick={toggleCountries}
-                aria-expanded={showCountries}
-            >
-                {t.countryList}
-            </button>
-
+            <button className="countrylist" onClick={toggleCountries} aria-expanded={showCountries}>{t.countryList}</button>
+            
             <form onSubmit={addCountry}>
-                <div>
-                    <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        placeholder={t.countryname}
-                        required
-                    />
-                    {errors.name && <div className="error">{errors.name}</div>}
-                </div>
-
-                <div>
-                    <input
-                        type="text"
-                        name="capital"
-                        value={formData.capital}
-                        onChange={handleInputChange}
-                        placeholder={t.capital}
-                        required
-                    />
-                    {errors.capital && (
-                        <div className="error">{errors.capital}</div>
-                    )}
-                </div>
-
-                <div>
-                    <input
-                        type="text"
-                        name="population"
-                        value={formData.population}
-                        onChange={handleInputChange}
-                        placeholder={t.populationPlaceholder}
-                        required
-                    />
-                    {errors.population && (
-                        <div className="error">{errors.population}</div>
-                    )}
-                </div>
-
-                <div>
-                    <input
-                        type="file"
-                        accept="image/jpeg, image/png"
-                        onChange={handleFileChange}
-                        required
-                    />
-                    {errors.image && (
-                        <div className="error">{errors.image}</div>
-                    )}
-                </div>
-
-                <button type="submit">{t.addCountry}</button>
+                <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Country Name"
+                />
+                <input
+                    type="text"
+                    value={formData.capital}
+                    onChange={(e) => setFormData({ ...formData, capital: e.target.value })}
+                    placeholder="Capital"
+                />
+                <input
+                    type="number"
+                    value={formData.population}
+                    onChange={(e) => setFormData({ ...formData, population: e.target.value })}
+                    placeholder="Population"
+                />
+                <input type="file" accept="image/jpeg, image/png" onChange={handleFileChange} required={!editIndex} />
+                <button type="submit">{editIndex !== null ? "Update Country" : t.addCountry}</button>
             </form>
-
             {showCountries && (
                 <>
-                    <button onClick={handleSort}>
-                        Sort by Likes (
-                        {state.sortOrder === 'asc' ? 'Ascending' : 'Descending'}
-                        )
-                    </button>
-
+                    <button onClick={handleSort}>Sort by Likes ({state.sortOrder === 'asc' ? 'Ascending' : 'Descending'})</button>
                     <div className="country-cards-container">
                         {state.countries.map((country, index) => (
                             <CountryCard
@@ -363,35 +275,15 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
                                 likes={country.likes}
                                 onLike={() => handleLike(index)}
                                 onDelete={() => handleDelete(index)}
+                                onEdit={() => handleEdit(index)}
                                 isDeleted={country.deleted}
-                            />
-                        ))}
-                    </div>
-
-                    <div className="deleted-country-article">
-                        Deleted Countries
-                    </div>
-
-                    <div className="deleted-country-cards-container">
-                        {state.deletedCountries.map((country, index) => (
-                            <CountryCard
-                                key={index}
-                                name={country.name}
-                                capital={country.capital}
-                                population={country.population}
-                                image={country.image}
-                                likes={country.likes}
-                                isDeleted={true}
-                                onRestore={() => handleRestore(index)}
                             />
                         ))}
                     </div>
                 </>
             )}
         </section>
-    )
-}
+    );
+};
 
-Hero.displayName = 'Hero component'
-
-export default Hero
+export default Hero;
