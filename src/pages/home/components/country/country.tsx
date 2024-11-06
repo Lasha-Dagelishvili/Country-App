@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom'
 
 const CountryCard = ({
     name,
@@ -9,28 +9,34 @@ const CountryCard = ({
     onLike = () => {},
     onDelete = () => {},
     onRestore = () => {},
-    onEdit = () => {},      
+    onEdit = () => {},
     isDeleted = false,
 }: {
-    name: string;
-    capital: string;
-    population: string;
-    image: string;
-    likes?: number;
-    onLike?: () => void;
-    onDelete?: () => void;
-    onRestore?: () => void;
-    onEdit?: () => void;
-    isDeleted?: boolean;
+    name: string
+    capital: string
+    population: string
+    image: string
+    likes?: number
+    onLike?: () => void
+    onDelete?: () => void
+    onRestore?: () => void
+    onEdit?: () => void
+    isDeleted?: boolean
 }) => {
     return (
         <div className={`card ${isDeleted ? 'deleted' : ''}`}>
             <img src={image} alt={`Image of ${name}`} />
             <div className="info">
                 <h2>{name}</h2>
-                <p><strong>Capital:</strong> {capital}</p>
-                <p><strong>Population:</strong> {population}</p>
-                <p><strong>Likes:</strong> {likes}</p>
+                <p>
+                    <strong>Capital:</strong> {capital}
+                </p>
+                <p>
+                    <strong>Population:</strong> {population}
+                </p>
+                <p>
+                    <strong>Likes:</strong> {likes}
+                </p>
 
                 {!isDeleted ? (
                     <>
@@ -46,7 +52,7 @@ const CountryCard = ({
                 )}
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default CountryCard;
+export default CountryCard

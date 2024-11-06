@@ -1,22 +1,12 @@
 
 import fs from 'fs';
-import axios from 'axios';
+import { fetchCountries } from './src/api/countries';
 
 const DATABASE_PATH = './database.json';
 
-const fetchCountries = async () => {
+const seedDatabase = async () => {
   try {
-    const response = await axios.get('https://restcountries.com/v3.1/all');
-    const countries = response.data;
-
-    const processedCountries = countries.map(country => ({
-      name: country.name.common,
-      capital: country.capital ? country.capital[0] : 'No Capital',
-      population: country.population.toString(),
-      image: country.flags?.png || '',
-      likes: 0,
-      deleted: false
-    }));
+    const processedCountries = await fetchCountries();
 
     let database = { countries: [] };
     if (fs.existsSync(DATABASE_PATH)) {
@@ -29,8 +19,8 @@ const fetchCountries = async () => {
     fs.writeFileSync(DATABASE_PATH, JSON.stringify(database, null, 2));
     console.log('Database seeded successfully!');
   } catch (error) {
-    console.error('Error fetching or saving data:', error);
+    console.error('Error seeding database:', error);
   }
 };
 
-fetchCountries();
+seedDatabase();
