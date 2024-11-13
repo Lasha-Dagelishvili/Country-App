@@ -1,9 +1,15 @@
 import '@/pages/home/components/hero/Hero.css'
 import countryImage from '@/pages/home/components/hero/pic/world.jpg'
 import CountryCard from '@/pages/home/components/country/country'
-import { useEffect, useReducer, useState, ChangeEvent } from 'react'
-import { useFetchCountries, addCountryToDatabase } from '@/api/countries/countries'
+import { useEffect, useReducer, useState, ChangeEvent, useRef } from 'react'
+import {
+    useFetchCountries,
+    addCountryToDatabase,
+} from '@/api/countries/countries'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useSearchParams } from 'react-router-dom'
+import { useVirtualizer } from '@tanstack/react-virtual';
+
 
 interface HeroProps {
     lang?: 'En' | 'Geo'
@@ -17,8 +23,6 @@ interface Country {
     likes: number
     deleted: boolean
 }
-
-
 
 type Action =
     | { type: 'SET_COUNTRIES'; payload: Country[] }
@@ -138,18 +142,24 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
         image: null as File | null,
     })
 
-    const { data: countriesData, isLoading, isError } = useFetchCountries()
+    const parentRef = useRef<HTMLDivElement>(null);
+
+    const rowVirtualizer = useVirtualizer({
+        count: state.countries.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 100,
+    });
+
     const queryClient = useQueryClient()
 
     const { mutate: addCountryMutate } = useMutation<Country, Error, Country>(
-        addCountryToDatabase,
+        addCountryToDatabase,    
         {
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['countries'] })
+                queryClient.invalidateQueries({ queryKey: ['countries'] });
             },
         }
-    )
-    
+    );
 
     const validateForm = () => {
         return (
@@ -198,22 +208,30 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
         }
     }
 
+    const [searchParams, setSearchParams] = useSearchParams();
+
     useEffect(() => {
-        if (countriesData) {
-            dispatch({ type: 'SET_COUNTRIES', payload: countriesData })
+        const sortParam = searchParams.get('sort');
+        if (sortParam === 'asc' || sortParam === 'desc') {
+            dispatch({
+                type: 'SORT_COUNTRIES',
+                payload: sortParam as 'asc' | 'desc',
+            });
         }
-    }, [countriesData])
+    }, [searchParams]);
+
+    const sortOrder = searchParams.get('sort') === 'desc' ? 'desc' : 'asc';
+
+    const { isLoading, isError } = useFetchCountries(sortOrder);
+
+    const handleSort = () => {
+        setSearchParams({ sort: sortOrder === 'asc' ? 'desc' : 'asc' });
+    };
 
     const handleLike = (index: number) => {
         dispatch({ type: 'LIKE_COUNTRY', payload: index })
     }
 
-    const handleSort = () => {
-        dispatch({
-            type: 'SORT_COUNTRIES',
-            payload: state.sortOrder === 'asc' ? 'desc' : 'asc',
-        })
-    }
 
     const handleDelete = (index: number) => {
         dispatch({ type: 'DELETE_COUNTRY', payload: index })
@@ -237,6 +255,7 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
     const toggleCountries = () => {
         setShowCountries(!showCountries)
     }
+    
 
     return (
         <section>
@@ -308,18 +327,40 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
             {isError && <p>Error loading countries</p>}
 
             {showCountries && (
-                <div>
+                <div ref={parentRef} style={{ height: '400px', overflow: 'auto' }}>
                     <button onClick={handleSort}>Sort by Likes</button>
-                    {state.countries.map((country, index) => (
-                            <CountryCard
-                            key={index}
-                            country={country}
-                            onLike={() => handleLike(index)}
-                            onDelete={() => handleDelete(index)}
-                            onEdit={() => handleEdit(index)}
-                            isDeleted={country.deleted}
-                        />
-                    ))}
+                    <div
+                        style={{
+                            height: `${rowVirtualizer.getTotalSize}px`,
+                            width: '100%',
+                            position: 'relative',
+                        }}
+                    >
+                        {rowVirtualizer.getVirtualItems.map((virtualRow) => {
+                            const country = state.countries[virtualRow.index];
+                            return (
+                                <div
+                                    key={virtualRow.index}
+                                    ref={virtualRow.measureRef}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        transform: `translateY(${virtualRow.start}px)`,
+                                        width: '100%',
+                                    }}
+                                >
+                                    <CountryCard
+                                        country={country}
+                                        onLike={() => handleLike(virtualRow.index)}
+                                        onDelete={() => handleDelete(virtualRow.index)}
+                                        onEdit={() => handleEdit(virtualRow.index)}
+                                        isDeleted={country.deleted}
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             )}
         </section>
@@ -327,3 +368,5 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
 }
 
 export default Hero
+
+

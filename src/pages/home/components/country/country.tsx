@@ -9,9 +9,12 @@ interface CountryCardProps {
     isDeleted?: boolean
 }
 
-
-
-const CountryCard: React.FC<CountryCardProps> = ({ country, onLike, onDelete, onEdit }) => (
+const CountryCard: React.FC<CountryCardProps> = ({
+    country,
+    onLike,
+    onDelete,
+    onEdit,
+}) => (
     <div>
         <h3>{country.name}</h3>
         <p>Capital: {country.capital}</p>
@@ -22,6 +25,5 @@ const CountryCard: React.FC<CountryCardProps> = ({ country, onLike, onDelete, on
         <button onClick={onEdit}>Edit</button>
     </div>
 )
-
 
 export default CountryCard

@@ -1,6 +1,6 @@
-
-import { useQuery, } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/api/axiosInstance'
+import { MutationFunction } from '@tanstack/react-query';
 
 export interface Country {
     name: string
@@ -11,37 +11,47 @@ export interface Country {
     deleted: boolean
 }
 
-const fetchCountriesData = async (): Promise<Country[]> => {
+const fetchCountriesData = async (sortOrder: 'asc' | 'desc'): Promise<Country[]> => {
     try {
-        const response = await axiosInstance.get('/all')
+        const sortQuery = sortOrder === 'asc' ? 'likes' : '-likes';
+        const response = await axiosInstance.get(`/countries?_sort=${sortQuery}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return response.data.map((country: any) => ({
             name: country.name.common,
             capital: country.capital ? country.capital[0] : 'No Capital',
             population: country.population.toString(),
             image: country.flags?.png || '',
-            likes: 0,
-            deleted: false,
-        }))
+            likes: country.likes,
+            deleted: country.deleted || false,
+        }));
     } catch (error) {
-        console.error('Error fetching countries:', error)
-        throw new Error('Could not fetch countries')
+        console.error('Error fetching countries:', error);
+        throw new Error('Could not fetch countries');
     }
-}
+};
 
-export const useFetchCountries = () => {
+
+export const useFetchCountries = (sortOrder: 'asc' | 'desc') => {
     return useQuery<Country[], Error>({
-        queryKey: ['countries'],
-        queryFn: fetchCountriesData,
-    })
-}
+        queryKey: ['countries', sortOrder],
+        queryFn: () => fetchCountriesData(sortOrder),
+    });
+};
 
-export const addCountryToDatabase = async (newCountry: Country): Promise<Country> => {
-    try {
-        const response = await axiosInstance.post('/add-country', newCountry)
-        return response.data
-    } catch (error) {
-        console.error('Error adding country:', error)
-        throw new Error('Could not add country')
+
+export const addCountryToDatabase: MutationFunction<Country, Country> = async (newCountry: Country) => {
+    const response = await fetch('/countries', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newCountry),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to add country');
     }
-}
+
+    return response.json();
+};
+
