@@ -8,8 +8,7 @@ import {
 } from '@/api/countries/countries'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
-import { useVirtualizer } from '@tanstack/react-virtual';
-
+import { useVirtualizer } from '@tanstack/react-virtual'
 
 interface HeroProps {
     lang?: 'En' | 'Geo'
@@ -142,24 +141,16 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
         image: null as File | null,
     })
 
-    const parentRef = useRef<HTMLDivElement>(null);
-
-    const rowVirtualizer = useVirtualizer({
-        count: state.countries.length,
-        getScrollElement: () => parentRef.current,
-        estimateSize: () => 100,
-    });
+    const parentRef = useRef<HTMLDivElement>(null)
 
     const queryClient = useQueryClient()
 
-    const { mutate: addCountryMutate } = useMutation<Country, Error, Country>(
-        addCountryToDatabase,    
-        {
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['countries'] });
-            },
-        }
-    );
+    const { mutate: addCountryMutate } = useMutation<Country, Error, Country>({
+        mutationFn: addCountryToDatabase,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['countries'] })
+        },
+    })
 
     const validateForm = () => {
         return (
@@ -208,30 +199,35 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
         }
     }
 
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams()
 
     useEffect(() => {
-        const sortParam = searchParams.get('sort');
+        const sortParam = searchParams.get('sort')
         if (sortParam === 'asc' || sortParam === 'desc') {
             dispatch({
                 type: 'SORT_COUNTRIES',
                 payload: sortParam as 'asc' | 'desc',
-            });
+            })
         }
-    }, [searchParams]);
+    }, [searchParams])
 
-    const sortOrder = searchParams.get('sort') === 'desc' ? 'desc' : 'asc';
+    const sortOrder = searchParams.get('sort') === 'desc' ? 'desc' : 'asc'
 
-    const { isLoading, isError } = useFetchCountries(sortOrder);
+    const { isLoading, isError, data } = useFetchCountries(sortOrder)
+
+    const rowVirtualizer = useVirtualizer({
+        count: data?.length ?? 0,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 180,
+    })
 
     const handleSort = () => {
-        setSearchParams({ sort: sortOrder === 'asc' ? 'desc' : 'asc' });
-    };
+        setSearchParams({ sort: sortOrder === 'asc' ? 'desc' : 'asc' })
+    }
 
     const handleLike = (index: number) => {
         dispatch({ type: 'LIKE_COUNTRY', payload: index })
     }
-
 
     const handleDelete = (index: number) => {
         dispatch({ type: 'DELETE_COUNTRY', payload: index })
@@ -255,7 +251,6 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
     const toggleCountries = () => {
         setShowCountries(!showCountries)
     }
-    
 
     return (
         <section>
@@ -327,7 +322,10 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
             {isError && <p>Error loading countries</p>}
 
             {showCountries && (
-                <div ref={parentRef} style={{ height: '400px', overflow: 'auto' }}>
+                <div
+                    ref={parentRef}
+                    style={{ height: '400px', overflow: 'auto' }}
+                >
                     <button onClick={handleSort}>Sort by Likes</button>
                     <div
                         style={{
@@ -336,12 +334,12 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
                             position: 'relative',
                         }}
                     >
-                        {rowVirtualizer.getVirtualItems.map((virtualRow) => {
-                            const country = state.countries[virtualRow.index];
+                        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                            const country = data?.[virtualRow.index]
+                            if (!country) return null
                             return (
                                 <div
                                     key={virtualRow.index}
-                                    ref={virtualRow.measureRef}
                                     style={{
                                         position: 'absolute',
                                         top: 0,
@@ -352,13 +350,19 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
                                 >
                                     <CountryCard
                                         country={country}
-                                        onLike={() => handleLike(virtualRow.index)}
-                                        onDelete={() => handleDelete(virtualRow.index)}
-                                        onEdit={() => handleEdit(virtualRow.index)}
+                                        onLike={() =>
+                                            handleLike(virtualRow.index)
+                                        }
+                                        onDelete={() =>
+                                            handleDelete(virtualRow.index)
+                                        }
+                                        onEdit={() =>
+                                            handleEdit(virtualRow.index)
+                                        }
                                         isDeleted={country.deleted}
                                     />
                                 </div>
-                            );
+                            )
                         })}
                     </div>
                 </div>
@@ -368,5 +372,3 @@ const Hero: React.FC<HeroProps> = ({ lang = 'En' }) => {
 }
 
 export default Hero
-
-
